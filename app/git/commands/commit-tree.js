@@ -8,6 +8,8 @@ class CommitTreeCommand {
      this.treeSHA = treeSHA;
      this.parentSHA = parentSHA;
      this.message = message;
+     console.log("Creating commit with tree SHA:", this.treeSHA);
+
   }
 
   execute() {
@@ -30,7 +32,7 @@ class CommitTreeCommand {
     const commitBuffer = Buffer.from(commitContent, "utf-8");
 
     // Create header
-    const header = `commit ${commitBuffer.length}\0`;
+    const header = `commit ${commitBuffer.length}\n`;
     const data = Buffer.concat([Buffer.from(header), commitBuffer]);
 
     // Compute SHA-1 hash

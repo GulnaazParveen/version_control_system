@@ -33,34 +33,33 @@ class ShowCommitCommand {
       const outputBuffer = zlib.inflateSync(fileContent);
       const output = outputBuffer.toString();
       console.log("📜 Raw Commit Content:\n", output);
+      // Parse commit content correctly
+      let lines = output.split("\n").map((line) => line.trim());
 
-      // Parse commit content
-      let lines = output.split("\n");
       let treeSHA = null,
         parentSHA = null,
         author = null,
         committer = null,
         commitMessage = "";
 
-      let commitMessageIndex = lines.findIndex((line) => line.trim() === "");
-      if (commitMessageIndex !== -1) {
-        commitMessage = lines
-          .slice(commitMessageIndex + 1)
-          .join("\n")
-          .trim();
-      }
-
-      for (let line of lines.slice(0, commitMessageIndex)) {
+      for (let line of lines) {
         if (line.startsWith("tree ")) {
-          treeSHA = line.split(" ")[1];
+          treeSHA = line.replace("tree ", "").trim(); 
         } else if (line.startsWith("parent ")) {
-          parentSHA = line.split(" ")[1];
+          parentSHA = line.replace("parent ", "").trim();
         } else if (line.startsWith("author ")) {
-          author = line.substring(7);
+          author = line.substring(7).trim();
         } else if (line.startsWith("committer ")) {
-          committer = line.substring(10);
+          committer = line.substring(10).trim();
+        } else if (line === "") {
+          commitMessage = lines
+            .slice(lines.indexOf(line) + 1)
+            .join("\n")
+            .trim();
+          break;
         }
       }
+
 
       // Print commit details
       console.log("\n==== Commit Details ====");

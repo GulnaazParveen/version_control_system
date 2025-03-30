@@ -22,6 +22,9 @@ switch (command) {
   case "init":
     createGitDirectory();
     break;
+  case "clone":
+     handleCloneCommand();
+     break;
   case "cat-file":
     handleCatFileCommand();
     break;
@@ -49,14 +52,40 @@ function createGitDirectory() {
   fs.mkdirSync(path.join(process.cwd(), ".mygit", "objects"), {
     recursive: true,
   });
-  fs.mkdirSync(path.join(process.cwd(), ".mygit", "refs"), { recursive: true });
 
+  // 🛠 Ensure refs/heads exists
+  fs.mkdirSync(path.join(process.cwd(), ".mygit", "refs", "heads"), {
+    recursive: true,
+  });
+
+  // 🛠 Initialize HEAD pointing to main
   fs.writeFileSync(
     path.join(process.cwd(), ".mygit", "HEAD"),
     "ref: refs/heads/main\n"
   );
+
   console.log("Initialized git directory");
 }
+
+
+// handle clone command
+async function handleCloneCommand() {
+  const remoteUrl = process.argv[3];
+  const localDir = process.argv[4] || "myrepo"; 
+
+  if (!remoteUrl) {
+    console.error("❌ Error: Remote URL required for cloning!");
+    return;
+  }
+
+  try {
+    await gitClient.clone(remoteUrl, localDir);
+    console.log("✅ Clone completed!");
+  } catch (error) {
+    console.error("❌ Clone failed:", error.message);
+  }
+}
+
 
 function handleCatFileCommand() {
   const flag = process.argv[3];
